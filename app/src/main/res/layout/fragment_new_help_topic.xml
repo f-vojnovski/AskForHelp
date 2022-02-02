@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".NewHelpTopicFragment"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    android:gravity="center"
+    android:background="@color/lightgray">
+
+    <ProgressBar
+        android:id="@+id/new_topic_fragment_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/new_topic_fragment_title"
+        android:paddingBottom="4dp">
+
+        <EditText
+            android:id="@+id/new_topic_fragment_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/new_topic_fragment_description"
+        android:paddingBottom="4dp">
+
+        <EditText
+            android:id="@+id/new_topic_fragment_description"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:gravity="top"
+            android:inputType="textMultiLine"
+            android:overScrollMode="always"
+            android:scrollbarStyle="insideInset"
+            android:scrollbars="vertical"
+            android:background="@color/white"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/new_topic_fragment_images_recycler_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:scrollbars="horizontal"/>
+
+    <Button
+        android:id="@+id/new_topic_fragment_add_photo_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/new_topic_fragment_add_photo_from_gallery"
+        app:icon="@drawable/ic_baseline_attach_file_24"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        app:strokeColor="@color/design_default_color_primary"
+        />
+
+    <Button
+        android:id="@+id/new_topic_fragment_take_photo_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/new_topic_fragment_photo_from_camera"
+        app:icon="@drawable/ic_baseline_camera_alt_24"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        app:strokeColor="@color/design_default_color_primary"
+    />
+
+    <Button
+        android:id="@+id/new_topic_fragment_post_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/new_topic_fragment_post_button"
+        />
+</LinearLayout>

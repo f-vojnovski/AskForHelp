@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">AskForHelp</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="register_form_email">E-Mail</string>
+    <string name="register_form_password">Password</string>
+    <string name="register_form_display_name">Display Name</string>
+    <string name="register_form_register_button_label">Register</string>
+    <string name="login_form_email">E-Mail</string>
+    <string name="login_form_password">Password</string>
+    <string name="login_form_login_button">Login</string>
+    <string name="register_fragment_redirect_to_login">Already have an account? Click here to login.</string>
+    <string name="home_nav_menu_home">Home</string>
+    <string name="home_nav_vendors">Vendors</string>
+    <string name="home_nav_services">Find services</string>
+    <string name="home_nav_new_post">New post</string>
+    <string name="home_nav_search_posts">Search posts</string>
+    <string name="new_topic_fragment_title">Post title</string>
+    <string name="new_topic_fragment_description">Describe your problem</string>
+    <string name="new_topic_fragment_add_photo_from_gallery">Attach photo from gallery</string>
+    <string name="new_topic_fragment_photo_from_camera">Take photo from camera</string>
+    <string name="new_topic_fragment_post_button">Post</string>
+    <string name="activity_view_help_topic_attached_images_label">Attached images:</string>
+    <string name="vendors_view_fragment_message_vendor_button_content_description">Message vendor</string>
+    <string name="search_help_topics_fragment_search_bar_hint">Try typing some keywords related to your problem...</string>
+    <string name="search_help_topics_fragment_search_button_label">Search</string>
+    <string name="search_help_topics_fragment_no_results_found">No results have been found!</string>
+    <string name="search_help_topics_fragment_no_results_alert_ok_button">OK</string>
+    <string name="new_topic_fragment_database_error">An unknown error occurred while trying to push the topic to database</string>
+    <string name="new_topic_fragment_database_error_ok_button">OK</string>
+    <string name="view_help_topic_no_attached_images_label">This post doesn\'t contain any images</string>
+    <string name="view_help_topic_activity_topic_not_found_error">Topic not found!</string>
+    <string name="view_help_topic_activity_topic_not_found_error_ok_button">OK</string>
+    <string name="home_actions_menu_action_settings">Action settings</string>
+    <string name="home_actions_apply_as_handyman_button">Apply as handyman</string>
+    <string name="home_actions_log_out_button">Log out</string>
+    <string name="view_help_topic_activity_add_solution_text_input_label">Add a solution to this problem</string>
+    <string name="view_help_topic_activity_post_solution_button">Post solution</string>
+    <string name="view_help_topic_activity_solutions_label">Solutions for this problem:</string>
+    <string name="home_actions_my_profile">My profile</string>
+    <string name="home_actions_recent_activity">Recent activity</string>
+    <string name="new_help_topic_activity_progress_bar_message">Posting post to database...</string>
+    <string name="user_activity_adapter_posted_comment">Added a solution to topic</string>
+    <string name="user_activity_adapter_posted_topic">Posted a new topic</string>
+</resources>
