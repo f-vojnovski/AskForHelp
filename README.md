@@ -6,7 +6,8 @@ lists local handymen with the distance to each one, and vendors you can open str
 Google Maps.
 
 Written in Java, using Firebase for authentication, data and file storage, and Algolia as
-the search index. Built as a university project.
+the search index. Built in 2022 as a university project for the Мобилни Апликации (Mobile
+Applications) course. It is not maintained.
 
 ![AskForHelp on a device: the help topics feed on the left, a single topic with its attached image and posted solutions on the right](https://user-images.githubusercontent.com/48998036/152127481-e21061e8-6987-4ef7-85ed-ee0849076db5.png)
 
@@ -77,9 +78,10 @@ the user can see what they have attached before posting. On post, every bitmap g
 from the content resolver's MIME type, and the file uploads to
 `images/{topicUid}/{index}.{ext}`.
 
-Each upload chains into `getDownloadUrl()`, and an `AtomicInteger` counts the completions so
-the topic is written to the database only once every URL has been collected into its
-`imageURLs` array. A post with no photos skips straight to that write.
+Each upload chains into `getDownloadUrl()`, and the topic is written to the database only once
+every upload has finished and its URL is in the `imageURLs` array. If an upload fails, the
+uploaded images are deleted and the topic is not posted. A post with no photos skips straight
+to that write.
 [ViewHelpTopicActivity.java](app/src/main/java/com/example/askforhelp/ViewHelpTopicActivity.java)
 reads the array back and Picasso loads each URL into the image strip.
 
@@ -208,12 +210,9 @@ to match your own). Enable the Email/Password sign-in provider, the Realtime Dat
 Storage and Cloud Messaging, then download the generated `google-services.json` and put it in
 [app/](app/).
 
-For Algolia, create an application and an index named `help-topics`, then replace the
-hardcoded `algoliaAppId` and `algoliaApiKey` fields in two places:
-[NewHelpTopicFragment.java:78-79](app/src/main/java/com/example/askforhelp/NewHelpTopicFragment.java#L78-L79),
-which needs a key permitted to add objects, and
-[SearchHelpTopicsFragment.java:33-34](app/src/main/java/com/example/askforhelp/SearchHelpTopicsFragment.java#L33-L34),
-which only needs search.
+For Algolia, create an application and an index named `help-topics`, then copy
+[local.properties.example](local.properties.example) to `local.properties` and fill in the
+app ID, a key permitted to add objects, and a search-only key.
 
 Nothing in the app writes to the `handymen` or `vendors` nodes, so seed those by hand in the
 Firebase console if you want the Find services and Vendors screens to show anything. A
