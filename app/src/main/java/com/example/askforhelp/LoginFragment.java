@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -64,9 +65,17 @@ public class LoginFragment extends Fragment {
                     if (task.isSuccessful()) {
                         onSuccessfulLogin();
                     } else {
-                        // TODO: Handle unsuccessful login
+                        showLoginError();
                     }
                 });
+    }
+
+    private void showLoginError() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.login_fragment_login_failed)
+                .setPositiveButton(R.string.login_fragment_login_failed_ok_button, (dialog, id) -> {});
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private void onSuccessfulLogin() {

@@ -38,6 +38,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -53,8 +54,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 // TODO: Add listeners to inform user when post is complete (do this later)
 // TODO: Change logic in this section so we don't make a copy of the image in storage
@@ -74,10 +75,6 @@ public class NewHelpTopicFragment extends Fragment {
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabaseRef;
     private StorageReference mStorageRef;
-
-    String algoliaAppId = "";
-    String algoliaApiKey = "";
-    String algoliaFriendSerachIndex = "help-topics";
 
     Client algoliaClient;
     Index algoliaIndex;
@@ -126,8 +123,7 @@ public class NewHelpTopicFragment extends Fragment {
         attachedImagesRecyclerView.setLayoutManager(attachedImagesLayoutManager);
         attachedImagesRecyclerView.setAdapter(attachedImagesAdapter);
 
-        algoliaClient = new Client(algoliaAppId, algoliaApiKey);
-        algoliaIndex = algoliaClient.getIndex(algoliaFriendSerachIndex);
+        setupAlgoliaIndex();
 
         mAuth = FirebaseAuth.getInstance();
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
@@ -165,7 +161,7 @@ public class NewHelpTopicFragment extends Fragment {
 
     private void onAddPhotoFromGalleryButtonClicked() {
         Intent attachImageIntent = new Intent(Intent.ACTION_PICK);
-        attachImageIntent.setType("image/**");
+        attachImageIntent.setType("image/*");
         attachImageResultLauncher.launch(attachImageIntent);
     }
 
@@ -191,9 +187,11 @@ public class NewHelpTopicFragment extends Fragment {
 
         if (attachedImagesList.size() == 0) {
             onAllPhotosUploaded(helpTopic);
+            return;
         }
 
-        AtomicInteger completedUploads = new AtomicInteger();
+        List<StorageReference> imageRefs = new ArrayList<>();
+        List<Task<Uri>> downloadUrlTasks = new ArrayList<>();
 
         for (int i = 0; i<attachedImagesList.size(); ++i) {
             Bitmap image = attachedImagesList.get(i).getmImageResource();
@@ -203,22 +201,29 @@ public class NewHelpTopicFragment extends Fragment {
                     + i + "." + FileExtensionFinder.findExtensionForFile(getActivity(), uri));
 
             UploadTask uploadTask = ref.putFile(uri);
-            uploadTask.continueWithTask(task -> ref.getDownloadUrl()).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    if (task.isSuccessful()) {
-                        Uri downloadUri = task.getResult();
-                        helpTopic.imageURLs.add(downloadUri.toString());
-                        completedUploads.getAndIncrement();
-                        if (completedUploads.get() == attachedImagesList.size()) {
-                            onAllPhotosUploaded(helpTopic);
-                        }
-                    } else {
+            imageRefs.add(ref);
+            downloadUrlTasks.add(uploadTask.continueWithTask(task -> ref.getDownloadUrl()));
+        }
+
+        // If any upload fails, delete the ones that succeeded and don't post
+        Tasks.whenAllComplete(downloadUrlTasks).addOnCompleteListener(allTasks -> {
+            for (Task<Uri> task : downloadUrlTasks) {
+                if (!task.isSuccessful()) {
+                    for (StorageReference ref : imageRefs) {
+                        ref.delete();
+                    }
+                    if (isAdded()) {
                         showDatabaseError();
                     }
+                    return;
                 }
-            });
-        }
+            }
+
+            for (Task<Uri> task : downloadUrlTasks) {
+                helpTopic.imageURLs.add(task.getResult().toString());
+            }
+            onAllPhotosUploaded(helpTopic);
+        });
     }
 
     private void onPhotoAttached(Bitmap image) {
@@ -232,10 +237,19 @@ public class NewHelpTopicFragment extends Fragment {
                 .setValue(helpTopic)
                 .addOnSuccessListener(aVoid -> {
                     pushTopicToAlgoliaIndex(helpTopic);
-                    openNewHelpTopic(helpTopic.uid);
+                    writeActivityLog(helpTopic);
+                    if (isAdded()) {
+                        openNewHelpTopic(helpTopic.uid);
+                    }
                 })
-                .addOnFailureListener(e -> showDatabaseError());
+                .addOnFailureListener(e -> {
+                    if (isAdded()) {
+                        showDatabaseError();
+                    }
+                });
+    }
 
+    private void writeActivityLog(HelpTopic helpTopic) {
         String logUid = UUID.randomUUID().toString();
         UserActivityLog activityLog = new UserActivityLog();
         activityLog.activityType = UserActivityType.ADDED_TOPIC;
@@ -250,7 +264,20 @@ public class NewHelpTopicFragment extends Fragment {
                 .setValue(activityLog);
     }
 
+    // Skipped when no keys are in local.properties
+    private void setupAlgoliaIndex() {
+        if (BuildConfig.ALGOLIA_APP_ID.isEmpty() || BuildConfig.ALGOLIA_WRITE_API_KEY.isEmpty()) {
+            return;
+        }
+        algoliaClient = new Client(BuildConfig.ALGOLIA_APP_ID, BuildConfig.ALGOLIA_WRITE_API_KEY);
+        algoliaIndex = algoliaClient.getIndex("help-topics");
+    }
+
     private void pushTopicToAlgoliaIndex(HelpTopic helpTopic) {
+        if (algoliaIndex == null) {
+            return;
+        }
+
         try {
             JSONObject object = new JSONObject()
                     .put("uid", helpTopic.uid)

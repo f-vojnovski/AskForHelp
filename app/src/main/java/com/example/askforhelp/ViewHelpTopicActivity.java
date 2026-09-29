@@ -56,6 +56,10 @@ public class ViewHelpTopicActivity extends AppCompatActivity {
     private StorageReference mStorageRef;
     private FirebaseAuth mAuth;
 
+    private DatabaseReference topicRef;
+    private DatabaseReference topicImagesRef;
+    private Query topicSolutionsQuery;
+
     private String currentTopicTitle;
     private String currentTopicUid;
 
@@ -173,24 +177,35 @@ public class ViewHelpTopicActivity extends AppCompatActivity {
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
-        mDatabaseRef
+        topicRef = mDatabaseRef
                 .child("help-topics")
-                .child(helpTopicUid)
-                .addValueEventListener(helpTopicListener);
+                .child(helpTopicUid);
+        topicRef.addValueEventListener(helpTopicListener);
 
-        mDatabaseRef
-                .child("help-topics")
-                .child(helpTopicUid)
-                .child("imageURLs")
-                .addValueEventListener(helpTopicImagesListener);
+        topicImagesRef = topicRef.child("imageURLs");
+        topicImagesRef.addValueEventListener(helpTopicImagesListener);
 
-        Query solutionsQuery = mDatabaseRef
-                .child("help-topics")
-                .child(helpTopicUid)
+        topicSolutionsQuery = topicRef
                 .child("solutions")
                 .orderByChild("dateTime");
+        topicSolutionsQuery.addValueEventListener(helpTopicSolutionsListener);
+    }
 
-        solutionsQuery.addValueEventListener(helpTopicSolutionsListener);
+    @Override
+    protected void onDestroy() {
+        if (topicRef != null) {
+            topicRef.removeEventListener(helpTopicListener);
+            topicRef = null;
+        }
+        if (topicImagesRef != null) {
+            topicImagesRef.removeEventListener(helpTopicImagesListener);
+            topicImagesRef = null;
+        }
+        if (topicSolutionsQuery != null) {
+            topicSolutionsQuery.removeEventListener(helpTopicSolutionsListener);
+            topicSolutionsQuery = null;
+        }
+        super.onDestroy();
     }
 
     private void showTopicError() {

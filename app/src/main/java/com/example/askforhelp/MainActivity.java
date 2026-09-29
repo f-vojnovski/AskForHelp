@@ -18,10 +18,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mAuth = FirebaseAuth.getInstance();
-        checkForLoggedInUser();
-
         super.onCreate(savedInstanceState);
+
+        mAuth = FirebaseAuth.getInstance();
+
+        if (redirectLoggedInUserToHome()) {
+            return;
+        }
+
         setContentView(R.layout.activity_main);
 
         fragmentManager = getSupportFragmentManager();
@@ -36,11 +40,14 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void checkForLoggedInUser() {
-        if (mAuth.getCurrentUser() != null) {
-            Intent intent = new Intent(this, HomeActivity.class);
-            startActivity(intent);
-            this.finish();
+    private boolean redirectLoggedInUserToHome() {
+        if (mAuth.getCurrentUser() == null) {
+            return false;
         }
+
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        this.finish();
+        return true;
     }
 }

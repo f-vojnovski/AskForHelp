@@ -30,10 +30,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class SearchHelpTopicsFragment extends Fragment {
-    private String algoliaAppId = "";
-    private String algoliaApiKey = "";
-    String algoliaFriendSearchIndex = "help-topics";
-
     private Client algoliaClient;
     private Index algoliaIndex;
 
@@ -70,8 +66,7 @@ public class SearchHelpTopicsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        algoliaClient = new Client(algoliaAppId, algoliaApiKey);
-        algoliaIndex = algoliaClient.getIndex(algoliaFriendSearchIndex);
+        setupAlgoliaIndex();
 
         searchQueryTextInputEditText = view.findViewById(R.id.search_help_topics_fragment_search_text_input);
         searchButton = view.findViewById(R.id.search_help_topics_fragment_search_button);
@@ -92,7 +87,20 @@ public class SearchHelpTopicsFragment extends Fragment {
         searchButton.setOnClickListener(v -> onSearchButtonClicked());
     }
 
+    // Skipped when no keys are in local.properties
+    private void setupAlgoliaIndex() {
+        if (BuildConfig.ALGOLIA_APP_ID.isEmpty() || BuildConfig.ALGOLIA_SEARCH_API_KEY.isEmpty()) {
+            return;
+        }
+        algoliaClient = new Client(BuildConfig.ALGOLIA_APP_ID, BuildConfig.ALGOLIA_SEARCH_API_KEY);
+        algoliaIndex = algoliaClient.getIndex("help-topics");
+    }
+
     private void onSearchButtonClicked() {
+        if (algoliaIndex == null) {
+            return;
+        }
+
         String query = searchQueryTextInputEditText.getText().toString();
         algoliaIndex.searchAsync(new Query(query), completionHandler);
     }

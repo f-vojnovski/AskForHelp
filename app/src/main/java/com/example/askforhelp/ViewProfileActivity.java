@@ -36,6 +36,7 @@ public class ViewProfileActivity extends AppCompatActivity {
     private ArrayList<UserActivityLogItem> userLogsList;
 
     private DatabaseReference mDatabaseRef;
+    private Query logsQuery;
 
     ValueEventListener activityLogsListener = new ValueEventListener() {
         @Override
@@ -92,11 +93,20 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
 
-        Query logsQuery = mDatabaseRef
+        logsQuery = mDatabaseRef
                 .child("users-activity-logs")
                 .child(userUid)
                 .orderByChild("dateTime");
 
         logsQuery.addValueEventListener(activityLogsListener);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (logsQuery != null) {
+            logsQuery.removeEventListener(activityLogsListener);
+            logsQuery = null;
+        }
+        super.onDestroy();
     }
 }

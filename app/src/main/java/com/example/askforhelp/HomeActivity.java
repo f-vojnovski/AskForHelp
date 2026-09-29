@@ -88,7 +88,7 @@ public class HomeActivity extends AppCompatActivity {
         HelpTopicsFragment helpTopicsFragment = HelpTopicsFragment.newInstance();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction
-                .replace(R.id.home_activity_fragment_container_view, helpTopicsFragment, "LOGIN_FRAGMENT")
+                .replace(R.id.home_activity_fragment_container_view, helpTopicsFragment, "TOPICS_VIEW_FRAGMENT")
                 .commit();
         bottomNav.setSelectedItemId(R.id.home_nav_home);
     }

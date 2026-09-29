@@ -47,6 +47,7 @@ public class ServicesFragment extends Fragment {
     private double clientLongitude;
 
     private DatabaseReference mDatabaseRef;
+    private DatabaseReference handymenRef;
 
     ProgressBar progressBar;
 
@@ -58,8 +59,14 @@ public class ServicesFragment extends Fragment {
                 String uid = handymanSnapshot.getKey();
                 String name = (String) handymanSnapshot.child("name").getValue();
                 String biography = (String) handymanSnapshot.child("biography").getValue();
-                double latitude = (double) handymanSnapshot.child("latitude").getValue();
-                double longitude = (double) handymanSnapshot.child("longitude").getValue();
+                // Whole numbers come back as Long, not Double
+                Object latitudeValue = handymanSnapshot.child("latitude").getValue();
+                Object longitudeValue = handymanSnapshot.child("longitude").getValue();
+                if (!(latitudeValue instanceof Number) || !(longitudeValue instanceof Number)) {
+                    continue;
+                }
+                double latitude = ((Number) latitudeValue).doubleValue();
+                double longitude = ((Number) longitudeValue).doubleValue();
 
                 float distance = (float) (LocationDistanceCalculator.findDistance
                         (latitude, clientLatitude,
@@ -76,6 +83,18 @@ public class ServicesFragment extends Fragment {
         @Override
         public void onCancelled(DatabaseError databaseError) {
             // TODO: Display error
+        }
+    };
+
+    private final LocationCallback locationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            if (locationResult == null) {
+                return;
+            }
+            for (Location location : locationResult.getLocations()) {
+                onLocationFound(location);
+            }
         }
     };
 
@@ -145,18 +164,6 @@ public class ServicesFragment extends Fragment {
 
     @SuppressLint("MissingPermission")
     private void onLocationPermissionsGranted() {
-        LocationCallback locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) {
-                    return;
-                }
-                for (Location location : locationResult.getLocations()) {
-                    onLocationFound(location);
-                }
-            }
-        };
-
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(60000);
         locationRequest.setFastestInterval(5000);
@@ -169,12 +176,30 @@ public class ServicesFragment extends Fragment {
     private void onLocationFound(Location location) {
         clientLatitude = location.getLatitude();
         clientLongitude = location.getLongitude();
-        readHandymenData();
+
+        if (handymenRef == null) {
+            readHandymenData();
+        }
     }
 
     private void readHandymenData() {
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        mDatabaseRef.child("handymen").addValueEventListener(handymenListener);
+        handymenRef = mDatabaseRef.child("handymen");
+        handymenRef.addValueEventListener(handymenListener);
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (handymenRef != null) {
+            handymenRef.removeEventListener(handymenListener);
+            handymenRef = null;
+        }
+
+        if (fusedLocationClient != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
+
+        super.onDestroyView();
     }
 
     private void onMessageHandymanClicked(HandymanItem handyman) {

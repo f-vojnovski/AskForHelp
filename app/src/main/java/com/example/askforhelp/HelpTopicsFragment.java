@@ -31,6 +31,7 @@ public class HelpTopicsFragment extends Fragment {
     private ArrayList<HelpTopicItem> topicsList;
 
     private DatabaseReference mDatabaseRef;
+    private Query helpTopicsQuery;
 
     ValueEventListener helpTopicsListener = new ValueEventListener() {
         @Override
@@ -94,8 +95,17 @@ public class HelpTopicsFragment extends Fragment {
         });
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        Query query = mDatabaseRef.child("help-topics").orderByChild("dateTime");
-        query.addValueEventListener(helpTopicsListener);
+        helpTopicsQuery = mDatabaseRef.child("help-topics").orderByChild("dateTime");
+        helpTopicsQuery.addValueEventListener(helpTopicsListener);
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (helpTopicsQuery != null) {
+            helpTopicsQuery.removeEventListener(helpTopicsListener);
+            helpTopicsQuery = null;
+        }
+        super.onDestroyView();
     }
 
     private void onTopicSelected(String topicUid) {

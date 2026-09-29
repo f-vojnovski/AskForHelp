@@ -30,6 +30,7 @@ public class VendorsFragment extends Fragment {
     private ArrayList<VendorItem> vendorsList;
 
     private DatabaseReference mDatabaseRef;
+    private DatabaseReference vendorsRef;
 
     ValueEventListener vendorsListener = new ValueEventListener() {
         @Override
@@ -89,7 +90,17 @@ public class VendorsFragment extends Fragment {
         });
 
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        mDatabaseRef.child("vendors").addValueEventListener(vendorsListener);
+        vendorsRef = mDatabaseRef.child("vendors");
+        vendorsRef.addValueEventListener(vendorsListener);
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (vendorsRef != null) {
+            vendorsRef.removeEventListener(vendorsListener);
+            vendorsRef = null;
+        }
+        super.onDestroyView();
     }
 
     private void openVendorLocation(VendorItem vendor) {

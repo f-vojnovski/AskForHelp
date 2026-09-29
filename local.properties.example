@@ -1,0 +1,5 @@
+# Copy to local.properties (gitignored) and fill in.
+# Write key needs the addObject ACL, search key only the search ACL.
+algolia.appId=
+algolia.writeApiKey=
+algolia.searchApiKey=
